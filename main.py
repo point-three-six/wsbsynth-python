@@ -106,8 +106,7 @@ def init():
                             data["special"] = "guh.mp3"
 
                         # store comment & symbol mentions in database if found.
-                        if extracted_symbols:
-                            store_symbol_mentions(msg.id, body, redditor.name, extracted_symbols)
+                        store_comment(msg.id, body, redditor.name, extracted_symbols)
 
                         queue[msg.id] = data
 
@@ -138,6 +137,7 @@ def init():
                         
         except:
             print("Exception caught, attempting to continue after cooldown ...")
+            # raise
             sleep(10)
 
 def is_valid(msg):
@@ -172,6 +172,15 @@ def synthesize_filter(msg):
     msg = re.sub(r'(?im)\bEOW\b', 'End of Week', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\bEOM\b', 'End of Month', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\bEOY\b', 'End of Year', msg,re.IGNORECASE)
+    msg = re.sub(r'(?im)\bglhf\b', 'good luck have fun', msg)
+    msg = re.sub(r'(?im)\bgghf\b', 'good game have fun', msg)
+    msg = re.sub(r'(?im)\bf`d up|f\'d up\b', 'fucked up', msg)
+    msg = re.sub(r'(?im)\bfk\b', 'fuck', msg)
+    msg = re.sub(r'(?im)\bdgaf\b', 'don\'t give a fuck', msg)
+    msg = re.sub(r'(?im)\bwtf\b', 'what the fuck', msg)
+    msg = re.sub(r'(?im)\bgl\b', 'good luck', msg)
+    msg = re.sub(r'(?im)\bffs\b', 'for fuck\'s sake', msg)
+    msg = re.sub(r'(?im)\b(buying|selling|buy|sell) big|big (buying|selling|buy|sell)\b', '', msg)
     msg = re.sub(r'(?im)\b(\d)m( line )?chart\b', r'\1 month chart', msg,re.IGNORECASE)
     msg = re.sub(r'(?im)\b(IV|I\.{1,}V\.{1,})\b', 'I V', msg)
     msg = re.sub(r'(\d+)-(\d+)', r'\1 to \2', msg, re.IGNORECASE)
@@ -190,6 +199,7 @@ def synthesize_filter(msg):
     msg = re.sub(r'(?im)\bitm\b', 'in the money', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\botm\b', 'out of the money', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\b401k\b', 'four oh one k', msg, re.IGNORECASE)
+    msg = re.sub(r'(?im)\bev\b', 'electronic vehicles', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\bidk\b', 'i don\'t know', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\bill\b', 'i\'ll', msg, re.IGNORECASE)
     msg = re.sub(r'->', 'to', msg, re.IGNORECASE)
@@ -201,6 +211,7 @@ def synthesize_filter(msg):
     msg = re.sub(r'(?im)\byk\b', 'you know', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\b(\d+)dte\b', r'\1 DTE', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\bwya\b', 'where ay at', msg, re.IGNORECASE)
+    msg = re.sub(r'(?im)\bbby\b', 'baby', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\botw\b', 'on the way', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\bjfc\b', 'Jesus fucking Christ', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\bytd\b', 'year to date', msg, re.IGNORECASE)
@@ -209,11 +220,14 @@ def synthesize_filter(msg):
     msg = re.sub(r'(?im)\bgtfo\b', 'get the fuck out', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\brh\b', 'robinhood', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\btf\b', 'the fuck', msg, re.IGNORECASE)
+    msg = re.sub(r'(?im)\bstfu\b', 'shut the fuck', msg, re.IGNORECASE)
+    msg = re.sub(r'\bTOS\b', 'think or swim', msg, re.IGNORECASE)
+    msg = re.sub(r'\bIN\b', 'in', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\bbtfd\b', 'buy the fucking dip', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\bstfd\b', 'sell the fucking dip', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\bhod\b', 'high of day', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\bplz\b', 'please', msg, re.IGNORECASE)
-    msg = re.sub(r'(?im)\b(tmr|tmrw)\b', 'tomorrow', msg, re.IGNORECASE)
+    msg = re.sub(r'(?im)\b(tmr|tmw|tmrw)\b', 'tomorrow', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\bim\b', 'i\'m', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\bimo\b', 'in my opinion', msg, re.IGNORECASE)
     msg = re.sub(r'(?im)\bath\b', 'all time high', msg, re.IGNORECASE)
@@ -230,14 +244,20 @@ def synthesize_filter(msg):
     msg = re.sub(r'(?im)\b(\d+)b\b', r'\1 billion', msg, re.IGNORECASE)
     msg = re.sub(r'\bIT\b', 'it', msg)
     msg = re.sub(r'(?im)\bur\b', 'you\'re', msg, re.IGNORECASE)
-    msg = re.sub(r'((https?:\/\/www\.)|(https?:\/\/)|(www\.))(.*?\.(com|net|org|co|us|ru|gov|edu|be|me|ai|tv|it))(\/[^\s]+)', r'\5', msg, re.IGNORECASE)
+    msg = re.sub(r'((https?:\/\/www\.)|(https?:\/\/)|(www\.))(.*?\.(com|biz|net|org|co|de|us|ru|gov|edu|be|me|ai|tv|it))(\/[^\s]+)', r'\5', msg, re.IGNORECASE)
 
     return msg
 
 def replace_symbols(msg, extracted_companies):
     for symbol in extracted_companies:
-        if len(companies[symbol][0]) <= 20:
-            msg = re.sub(r'(?im)\b\$?'+ symbol +r'\b', companies[symbol][0], msg)
+        company = companies[symbol][0]
+
+        # replace any occurrence of "corporation" or "inc"
+        company = re.sub(r'(?im)\bcorporation|corp\.?\b', '', company)
+        company = re.sub(r'(?im)\binc\.?\b', '', company)
+
+        if len(company) <= 20:
+            msg = re.sub(r'(?im)\b\$?'+ symbol +r'\b', company, msg)
 
     return msg
 
@@ -246,10 +266,19 @@ def extract_symbols(msg):
 
     # some fixes
     msg = re.sub(r'(?im)\'|’', '', msg)
+    msg = re.sub(r'(?im)\$([a-z])+', r'\1', msg)
+    msg = re.sub(r'(?im)\bhold(ing)? onto\b', '', msg)
+    msg = re.sub(r'(?im)\bcar stocks?\b', '', msg)
     msg = re.sub(r'(?im)\bthe mouse\b', 'DIS', msg)
     msg = re.sub(r'(?im)\b(average cost|cost me)', '', msg)
     msg = re.sub(r'(?im)\bford\b', '$F', msg)
+    msg = re.sub(r'(?im)\bmy self\b', '', msg)
+    msg = re.sub(r'(?im)\bthe spot\b', '', msg)
+    msg = re.sub(r'(?im)\bhealth care\b', '', msg)
+    msg = re.sub(r'(?im)\bcathie wood\b', '', msg)
     msg = re.sub(r'(?im)\bbeat up\b', '', msg)
+    msg = re.sub(r'(?im)\brun down\b', '', msg)
+    msg = re.sub(r'(?im)\bdrill team \d+\b', '', msg)
     msg = re.sub(r'(?im)\b:D\b', '', msg)
     msg = re.sub(r'(?im)\b(my|of) life\b', '', msg)
     msg = re.sub(r'(?im)\b(O\+|o juice)\b', '', msg)
@@ -257,6 +286,7 @@ def extract_symbols(msg):
     msg = re.sub(r'(?im)\bbc (I|im)\b', '', msg)
     msg = re.sub(r'(?im)\b(my eyes|my kids)\b', '', msg)
     msg = re.sub(r'(?im)\br u\b', '', msg)
+    msg = re.sub(r'(?im)\beyes on\b', '', msg)
     msg = re.sub(r'(?im)\b(buy|sell) low\b', '', msg)
     msg = re.sub(r'(?im)\brun up\b', '', msg)
     msg = re.sub(r'(?im)\b24 hr\b', '', msg)
@@ -302,7 +332,7 @@ def extract_symbols(msg):
     for name, symbol in dict_common_names:
         if re.search(r"\b\$?"+ re.escape(name) +r"\b", msg):
             extracted[symbol] = companies[symbol][0]
-
+    
     return extracted
 
 def is_ambiguous_false_positive(symbol, msg):
@@ -337,15 +367,15 @@ def is_ambiguous_false_positive(symbol, msg):
 
     return True
 
-def store_symbol_mentions(msg_id, msg_body, msg_username, symbols):
-    # tickers found. store comment.
+def store_comment(msg_id, msg_body, msg_username, symbols):
     try:
         dbcur.execute("INSERT INTO comments (dd_id, comment_id, username, text, date) VALUES (%s, %s, %s, %s, NOW())", (cur_dd.id, msg_id, msg_username, msg_body))
 
         insert_id = dbcur.lastrowid
 
-        for symbol in symbols:
-            dbcur.execute("INSERT INTO comments_symbols (comment_id, symbol_id) VALUES (%s, %s)", (insert_id, companies[symbol][1]))
+        if symbols:
+            for symbol in symbols:
+                dbcur.execute("INSERT INTO comments_symbols (comment_id, symbol_id) VALUES (%s, %s)", (insert_id, companies[symbol][1]))
         
         db.commit()
     except:
@@ -369,7 +399,7 @@ def synthesize(queue, id):
         path = "/usr/local/var/www/wsbdd/synthesized/"
 
     if PROD:
-        voices = ["Brian", "Justin"]
+        voices = ["Brian", "Amy"]
     else:
         voices = ["Brian"]
 
@@ -445,9 +475,10 @@ def detect_dd(reddit):
     global cur_dd
     
     dd = None
-    new_posts = list(reddit.subreddit('wallstreetbets').new(limit=400))
+    new_posts = list(reddit.subreddit('wallstreetbets').new(limit=800))
     for post in new_posts:
-        if(post.link_flair_text == "Daily Discussion" or post.link_flair_text == "Weekend Discussion"):
+        if post.link_flair_text == "Daily Discussion" or post.link_flair_text == "Weekend Discussion":
+        #if post.title.lower() == "daily discussion thread for november 10, 2020":
             print(post.title.lower())
             dd = post
             break
@@ -455,7 +486,7 @@ def detect_dd(reddit):
     # new dd
     if not cur_dd or cur_dd.id != dd.id:
         cur_dd = dd
-
+        print(dd)
         metadata = {
             "url" : dd.url,
             "title" : dd.title
